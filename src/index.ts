@@ -17,9 +17,10 @@ async function start() {
 
     // Create and start Express server
     const app = createServer();
-    const server = app.listen(config.app.port, () => {
-      logger.info(`Server listening on port ${config.app.port}`, {
+    const server = app.listen(config.app.port, config.app.host, () => {
+      logger.info(`Server listening on ${config.app.host}:${config.app.port}`, {
         environment: config.app.env,
+        host: config.app.host,
         port: config.app.port,
       });
     });

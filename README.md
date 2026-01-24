@@ -258,6 +258,7 @@ See `.env.example` for all available options:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NODE_ENV` | Environment (development/production) | development |
+| `HOST` | API server host | localhost |
 | `PORT` | API server port | 3000 |
 | `DB_HOST` | PostgreSQL host | localhost |
 | `DB_PORT` | PostgreSQL port | 5432 |

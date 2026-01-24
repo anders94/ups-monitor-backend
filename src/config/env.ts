@@ -6,6 +6,7 @@ dotenv.config();
 const envSchema = Joi.object({
   // Application
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+  HOST: Joi.string().default('localhost'),
   PORT: Joi.number().default(3000),
   API_KEY: Joi.string().optional(),
 
@@ -51,6 +52,7 @@ if (error) {
 export const config = {
   app: {
     env: envVars.NODE_ENV as string,
+    host: envVars.HOST as string,
     port: envVars.PORT as number,
     apiKey: envVars.API_KEY as string | undefined,
     isDevelopment: envVars.NODE_ENV === 'development',
