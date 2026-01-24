@@ -101,6 +101,24 @@ export interface HealthStatus {
   uptime: number;
 }
 
+export interface DeviceSummary {
+  id: number;
+  name: string;
+  host: string;
+  enabled: boolean;
+  lastPollAt?: Date;
+  lastPollSuccess?: boolean;
+  latestMetrics?: {
+    timestamp?: Date;
+    outputPowerWatts?: number;
+    outputLoadPercent?: number;
+    batteryCapacityPercent?: number;
+    batteryStatus?: string;
+    onBattery?: boolean;
+    onLine?: boolean;
+  };
+}
+
 export interface SystemStats {
   devices: {
     total: number;
@@ -119,4 +137,5 @@ export interface SystemStats {
     sizeBytes?: number;
     sizeMb?: number;
   };
+  deviceSummaries: DeviceSummary[];
 }

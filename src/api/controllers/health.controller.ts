@@ -76,6 +76,32 @@ export class HealthController {
         // Ignore if unable to get database size
       }
 
+      // Get all devices with their latest metrics
+      const devices = await deviceService.getAllDevices();
+      const deviceSummaries = await Promise.all(
+        devices.map(async (device) => {
+          const latestMetric = await metricsService.getLatestMetric(device.id);
+
+          return {
+            id: device.id,
+            name: device.name,
+            host: device.host,
+            enabled: device.enabled,
+            lastPollAt: device.lastPollAt,
+            lastPollSuccess: device.lastPollSuccess,
+            latestMetrics: latestMetric ? {
+              timestamp: latestMetric.timestamp,
+              outputPowerWatts: latestMetric.outputPowerWatts,
+              outputLoadPercent: latestMetric.outputLoadPercent,
+              batteryCapacityPercent: latestMetric.batteryCapacityPercent,
+              batteryStatus: latestMetric.batteryStatus,
+              onBattery: latestMetric.onBattery,
+              onLine: latestMetric.onLine,
+            } : undefined,
+          };
+        })
+      );
+
       const stats: SystemStats = {
         devices: {
           total: parseInt(deviceStats.total, 10),
@@ -94,6 +120,7 @@ export class HealthController {
           sizeBytes: dbSize,
           sizeMb: dbSize ? Math.round(dbSize / 1024 / 1024 * 100) / 100 : undefined,
         },
+        deviceSummaries,
       };
 
       res.json({

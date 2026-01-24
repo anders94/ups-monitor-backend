@@ -9,7 +9,7 @@ export class MetricsRepository {
    */
   async insertRawMetric(metric: Partial<MetricRaw>): Promise<MetricRaw> {
     try {
-      const result = await db.query<MetricRaw>(`
+      const result = await db.query<any>(`
         INSERT INTO metrics_raw (
           device_id, timestamp,
           output_power_watts, output_power_va, output_load_percent,
@@ -21,7 +21,29 @@ export class MetricsRepository {
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
           $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
-        ) RETURNING *
+        ) RETURNING
+          id,
+          device_id as "deviceId",
+          timestamp,
+          output_power_watts as "outputPowerWatts",
+          output_power_va as "outputPowerVa",
+          output_load_percent as "outputLoadPercent",
+          battery_status as "batteryStatus",
+          battery_capacity_percent as "batteryCapacityPercent",
+          battery_voltage as "batteryVoltage",
+          battery_temperature as "batteryTemperature",
+          battery_runtime_remaining_seconds as "batteryRuntimeRemainingSeconds",
+          input_voltage as "inputVoltage",
+          input_frequency as "inputFrequency",
+          input_current as "inputCurrent",
+          output_voltage as "outputVoltage",
+          output_frequency as "outputFrequency",
+          output_current as "outputCurrent",
+          on_battery as "onBattery",
+          on_line as "onLine",
+          on_bypass as "onBypass",
+          alarms_present as "alarmsPresent",
+          created_at as "createdAt"
       `, [
         metric.deviceId,
         metric.timestamp || new Date(),
@@ -45,7 +67,7 @@ export class MetricsRepository {
         metric.alarmsPresent || false,
       ]);
 
-      return result.rows[0];
+      return result.rows[0] as MetricRaw;
     } catch (error) {
       logger.error('Failed to insert raw metric', { deviceId: metric.deviceId, error });
       throw new DatabaseError('Failed to insert raw metric');
@@ -57,8 +79,31 @@ export class MetricsRepository {
    */
   async getLatestMetric(deviceId: number): Promise<MetricRaw | null> {
     try {
-      const result = await db.query<MetricRaw>(`
-        SELECT * FROM metrics_raw
+      const result = await db.query<any>(`
+        SELECT
+          id,
+          device_id as "deviceId",
+          timestamp,
+          output_power_watts as "outputPowerWatts",
+          output_power_va as "outputPowerVa",
+          output_load_percent as "outputLoadPercent",
+          battery_status as "batteryStatus",
+          battery_capacity_percent as "batteryCapacityPercent",
+          battery_voltage as "batteryVoltage",
+          battery_temperature as "batteryTemperature",
+          battery_runtime_remaining_seconds as "batteryRuntimeRemainingSeconds",
+          input_voltage as "inputVoltage",
+          input_frequency as "inputFrequency",
+          input_current as "inputCurrent",
+          output_voltage as "outputVoltage",
+          output_frequency as "outputFrequency",
+          output_current as "outputCurrent",
+          on_battery as "onBattery",
+          on_line as "onLine",
+          on_bypass as "onBypass",
+          alarms_present as "alarmsPresent",
+          created_at as "createdAt"
+        FROM metrics_raw
         WHERE device_id = $1
         ORDER BY timestamp DESC
         LIMIT 1
@@ -80,15 +125,38 @@ export class MetricsRepository {
     end: Date
   ): Promise<MetricRaw[]> {
     try {
-      const result = await db.query<MetricRaw>(`
-        SELECT * FROM metrics_raw
+      const result = await db.query<any>(`
+        SELECT
+          id,
+          device_id as "deviceId",
+          timestamp,
+          output_power_watts as "outputPowerWatts",
+          output_power_va as "outputPowerVa",
+          output_load_percent as "outputLoadPercent",
+          battery_status as "batteryStatus",
+          battery_capacity_percent as "batteryCapacityPercent",
+          battery_voltage as "batteryVoltage",
+          battery_temperature as "batteryTemperature",
+          battery_runtime_remaining_seconds as "batteryRuntimeRemainingSeconds",
+          input_voltage as "inputVoltage",
+          input_frequency as "inputFrequency",
+          input_current as "inputCurrent",
+          output_voltage as "outputVoltage",
+          output_frequency as "outputFrequency",
+          output_current as "outputCurrent",
+          on_battery as "onBattery",
+          on_line as "onLine",
+          on_bypass as "onBypass",
+          alarms_present as "alarmsPresent",
+          created_at as "createdAt"
+        FROM metrics_raw
         WHERE device_id = $1
           AND timestamp >= $2
           AND timestamp <= $3
         ORDER BY timestamp ASC
       `, [deviceId, start, end]);
 
-      return result.rows;
+      return result.rows as MetricRaw[];
     } catch (error) {
       logger.error('Failed to get raw metrics', { deviceId, start, end, error });
       throw new DatabaseError('Failed to get raw metrics');
@@ -105,8 +173,41 @@ export class MetricsRepository {
     bucketDurationSeconds: number
   ): Promise<MetricAggregated[]> {
     try {
-      const result = await db.query<MetricAggregated>(`
-        SELECT * FROM metrics_aggregated
+      const result = await db.query<any>(`
+        SELECT
+          id,
+          device_id as "deviceId",
+          bucket_start as "bucketStart",
+          bucket_duration_seconds as "bucketDurationSeconds",
+          avg_output_power_watts as "avgOutputPowerWatts",
+          min_output_power_watts as "minOutputPowerWatts",
+          max_output_power_watts as "maxOutputPowerWatts",
+          avg_output_power_va as "avgOutputPowerVa",
+          min_output_power_va as "minOutputPowerVa",
+          max_output_power_va as "maxOutputPowerVa",
+          avg_output_load_percent as "avgOutputLoadPercent",
+          min_output_load_percent as "minOutputLoadPercent",
+          max_output_load_percent as "maxOutputLoadPercent",
+          avg_battery_capacity_percent as "avgBatteryCapacityPercent",
+          min_battery_capacity_percent as "minBatteryCapacityPercent",
+          max_battery_capacity_percent as "maxBatteryCapacityPercent",
+          avg_battery_voltage as "avgBatteryVoltage",
+          min_battery_voltage as "minBatteryVoltage",
+          max_battery_voltage as "maxBatteryVoltage",
+          avg_battery_temperature as "avgBatteryTemperature",
+          min_battery_temperature as "minBatteryTemperature",
+          max_battery_temperature as "maxBatteryTemperature",
+          avg_battery_runtime_remaining_seconds as "avgBatteryRuntimeRemainingSeconds",
+          avg_input_voltage as "avgInputVoltage",
+          avg_output_voltage as "avgOutputVoltage",
+          avg_input_frequency as "avgInputFrequency",
+          avg_output_frequency as "avgOutputFrequency",
+          on_battery_sample_count as "onBatterySampleCount",
+          on_battery_total_seconds as "onBatteryTotalSeconds",
+          on_battery_event_count as "onBatteryEventCount",
+          sample_count as "sampleCount",
+          created_at as "createdAt"
+        FROM metrics_aggregated
         WHERE device_id = $1
           AND bucket_duration_seconds = $2
           AND bucket_start >= $3
@@ -114,7 +215,7 @@ export class MetricsRepository {
         ORDER BY bucket_start ASC
       `, [deviceId, bucketDurationSeconds, start, end]);
 
-      return result.rows;
+      return result.rows as MetricAggregated[];
     } catch (error) {
       logger.error('Failed to get aggregated metrics', { deviceId, start, end, error });
       throw new DatabaseError('Failed to get aggregated metrics');
@@ -131,8 +232,41 @@ export class MetricsRepository {
     bucketDurationSeconds: number
   ): Promise<MetricAggregated[]> {
     try {
-      const result = await db.query<MetricAggregated>(`
-        SELECT * FROM metrics_aggregated
+      const result = await db.query<any>(`
+        SELECT
+          id,
+          device_id as "deviceId",
+          bucket_start as "bucketStart",
+          bucket_duration_seconds as "bucketDurationSeconds",
+          avg_output_power_watts as "avgOutputPowerWatts",
+          min_output_power_watts as "minOutputPowerWatts",
+          max_output_power_watts as "maxOutputPowerWatts",
+          avg_output_power_va as "avgOutputPowerVa",
+          min_output_power_va as "minOutputPowerVa",
+          max_output_power_va as "maxOutputPowerVa",
+          avg_output_load_percent as "avgOutputLoadPercent",
+          min_output_load_percent as "minOutputLoadPercent",
+          max_output_load_percent as "maxOutputLoadPercent",
+          avg_battery_capacity_percent as "avgBatteryCapacityPercent",
+          min_battery_capacity_percent as "minBatteryCapacityPercent",
+          max_battery_capacity_percent as "maxBatteryCapacityPercent",
+          avg_battery_voltage as "avgBatteryVoltage",
+          min_battery_voltage as "minBatteryVoltage",
+          max_battery_voltage as "maxBatteryVoltage",
+          avg_battery_temperature as "avgBatteryTemperature",
+          min_battery_temperature as "minBatteryTemperature",
+          max_battery_temperature as "maxBatteryTemperature",
+          avg_battery_runtime_remaining_seconds as "avgBatteryRuntimeRemainingSeconds",
+          avg_input_voltage as "avgInputVoltage",
+          avg_output_voltage as "avgOutputVoltage",
+          avg_input_frequency as "avgInputFrequency",
+          avg_output_frequency as "avgOutputFrequency",
+          on_battery_sample_count as "onBatterySampleCount",
+          on_battery_total_seconds as "onBatteryTotalSeconds",
+          on_battery_event_count as "onBatteryEventCount",
+          sample_count as "sampleCount",
+          created_at as "createdAt"
+        FROM metrics_aggregated
         WHERE device_id = ANY($1)
           AND bucket_duration_seconds = $2
           AND bucket_start >= $3
@@ -140,7 +274,7 @@ export class MetricsRepository {
         ORDER BY bucket_start ASC, device_id ASC
       `, [deviceIds, bucketDurationSeconds, start, end]);
 
-      return result.rows;
+      return result.rows as MetricAggregated[];
     } catch (error) {
       logger.error('Failed to get multi-device aggregated metrics', { deviceIds, start, end, error });
       throw new DatabaseError('Failed to get multi-device aggregated metrics');

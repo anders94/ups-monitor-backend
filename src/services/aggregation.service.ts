@@ -79,12 +79,12 @@ export class AggregationService {
 
     try {
       const result = await db.query(`
-        SELECT device_id
+        SELECT device_id as "deviceId"
         FROM devices
         WHERE enabled = true
       `);
 
-      const deviceIds = result.rows.map((row: any) => row.device_id);
+      const deviceIds = result.rows.map((row: any) => row.deviceId);
 
       let totalInserted = 0;
 

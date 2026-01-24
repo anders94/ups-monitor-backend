@@ -13,15 +13,29 @@ export class EventsRepository {
     batteryCapacityStartPercent?: number
   ): Promise<BatteryEvent> {
     try {
-      const result = await db.query<BatteryEvent>(`
+      const result = await db.query<any>(`
         INSERT INTO battery_events (
           device_id, event_start, battery_capacity_start_percent, event_completed
         ) VALUES ($1, $2, $3, false)
-        RETURNING *
+        RETURNING
+          id,
+          device_id as "deviceId",
+          event_start as "eventStart",
+          event_end as "eventEnd",
+          duration_seconds as "durationSeconds",
+          battery_capacity_start_percent as "batteryCapacityStartPercent",
+          battery_capacity_end_percent as "batteryCapacityEndPercent",
+          battery_capacity_drop_percent as "batteryCapacityDropPercent",
+          trigger_reason as "triggerReason",
+          max_load_percent as "maxLoadPercent",
+          avg_load_percent as "avgLoadPercent",
+          event_completed as "eventCompleted",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
       `, [deviceId, eventStart, batteryCapacityStartPercent]);
 
       logger.info('Battery event started', { deviceId, eventId: result.rows[0].id });
-      return result.rows[0];
+      return result.rows[0] as BatteryEvent;
     } catch (error) {
       logger.error('Failed to create battery event', { deviceId, error });
       throw new DatabaseError('Failed to create battery event');
@@ -33,14 +47,29 @@ export class EventsRepository {
    */
   async getOngoingEvent(deviceId: number): Promise<BatteryEvent | null> {
     try {
-      const result = await db.query<BatteryEvent>(`
-        SELECT * FROM battery_events
+      const result = await db.query<any>(`
+        SELECT
+          id,
+          device_id as "deviceId",
+          event_start as "eventStart",
+          event_end as "eventEnd",
+          duration_seconds as "durationSeconds",
+          battery_capacity_start_percent as "batteryCapacityStartPercent",
+          battery_capacity_end_percent as "batteryCapacityEndPercent",
+          battery_capacity_drop_percent as "batteryCapacityDropPercent",
+          trigger_reason as "triggerReason",
+          max_load_percent as "maxLoadPercent",
+          avg_load_percent as "avgLoadPercent",
+          event_completed as "eventCompleted",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM battery_events
         WHERE device_id = $1 AND event_completed = false
         ORDER BY event_start DESC
         LIMIT 1
       `, [deviceId]);
 
-      return result.rows[0] || null;
+      return (result.rows[0] as BatteryEvent) || null;
     } catch (error) {
       logger.error('Failed to get ongoing event', { deviceId, error });
       throw new DatabaseError('Failed to get ongoing event');
@@ -58,7 +87,7 @@ export class EventsRepository {
     avgLoadPercent?: number
   ): Promise<BatteryEvent> {
     try {
-      const result = await db.query<BatteryEvent>(`
+      const result = await db.query<any>(`
         UPDATE battery_events
         SET
           event_end = $1,
@@ -73,11 +102,25 @@ export class EventsRepository {
           avg_load_percent = $4,
           event_completed = true
         WHERE id = $5
-        RETURNING *
+        RETURNING
+          id,
+          device_id as "deviceId",
+          event_start as "eventStart",
+          event_end as "eventEnd",
+          duration_seconds as "durationSeconds",
+          battery_capacity_start_percent as "batteryCapacityStartPercent",
+          battery_capacity_end_percent as "batteryCapacityEndPercent",
+          battery_capacity_drop_percent as "batteryCapacityDropPercent",
+          trigger_reason as "triggerReason",
+          max_load_percent as "maxLoadPercent",
+          avg_load_percent as "avgLoadPercent",
+          event_completed as "eventCompleted",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
       `, [eventEnd, batteryCapacityEndPercent, maxLoadPercent, avgLoadPercent, eventId]);
 
       logger.info('Battery event completed', { eventId });
-      return result.rows[0];
+      return result.rows[0] as BatteryEvent;
     } catch (error) {
       logger.error('Failed to complete battery event', { eventId, error });
       throw new DatabaseError('Failed to complete battery event');
@@ -94,8 +137,23 @@ export class EventsRepository {
     limit: number = 100
   ): Promise<BatteryEvent[]> {
     try {
-      const result = await db.query<BatteryEvent>(`
-        SELECT * FROM battery_events
+      const result = await db.query<any>(`
+        SELECT
+          id,
+          device_id as "deviceId",
+          event_start as "eventStart",
+          event_end as "eventEnd",
+          duration_seconds as "durationSeconds",
+          battery_capacity_start_percent as "batteryCapacityStartPercent",
+          battery_capacity_end_percent as "batteryCapacityEndPercent",
+          battery_capacity_drop_percent as "batteryCapacityDropPercent",
+          trigger_reason as "triggerReason",
+          max_load_percent as "maxLoadPercent",
+          avg_load_percent as "avgLoadPercent",
+          event_completed as "eventCompleted",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM battery_events
         WHERE device_id = $1
           AND event_start >= $2
           AND event_start <= $3
@@ -103,7 +161,7 @@ export class EventsRepository {
         LIMIT $4
       `, [deviceId, start, end, limit]);
 
-      return result.rows;
+      return result.rows as BatteryEvent[];
     } catch (error) {
       logger.error('Failed to get battery events', { deviceId, start, end, error });
       throw new DatabaseError('Failed to get battery events');
@@ -120,8 +178,23 @@ export class EventsRepository {
     limit: number = 100
   ): Promise<BatteryEvent[]> {
     try {
-      const result = await db.query<BatteryEvent>(`
-        SELECT * FROM battery_events
+      const result = await db.query<any>(`
+        SELECT
+          id,
+          device_id as "deviceId",
+          event_start as "eventStart",
+          event_end as "eventEnd",
+          duration_seconds as "durationSeconds",
+          battery_capacity_start_percent as "batteryCapacityStartPercent",
+          battery_capacity_end_percent as "batteryCapacityEndPercent",
+          battery_capacity_drop_percent as "batteryCapacityDropPercent",
+          trigger_reason as "triggerReason",
+          max_load_percent as "maxLoadPercent",
+          avg_load_percent as "avgLoadPercent",
+          event_completed as "eventCompleted",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM battery_events
         WHERE device_id = ANY($1)
           AND event_start >= $2
           AND event_start <= $3
@@ -129,7 +202,7 @@ export class EventsRepository {
         LIMIT $4
       `, [deviceIds, start, end, limit]);
 
-      return result.rows;
+      return result.rows as BatteryEvent[];
     } catch (error) {
       logger.error('Failed to get multi-device battery events', { deviceIds, start, end, error });
       throw new DatabaseError('Failed to get multi-device battery events');

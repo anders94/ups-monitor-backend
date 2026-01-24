@@ -116,7 +116,7 @@ export class DeviceRepository {
    */
   async create(input: DeviceCreateInput): Promise<Device> {
     try {
-      const result = await db.query<Device>(`
+      const result = await db.query<any>(`
         INSERT INTO devices (
           name, host, port, manufacturer, model,
           snmp_version, snmp_username, snmp_auth_protocol, snmp_auth_key,
@@ -124,7 +124,25 @@ export class DeviceRepository {
           oid_profile, oid_overrides, poll_interval_seconds, enabled
         ) VALUES (
           $1, $2, $3, $4, $5, '3', $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
-        ) RETURNING *
+        ) RETURNING
+          id, name, host, port, manufacturer, model,
+          snmp_version as "snmpVersion",
+          snmp_username as "snmpUsername",
+          snmp_auth_protocol as "snmpAuthProtocol",
+          snmp_auth_key as "snmpAuthKey",
+          snmp_priv_protocol as "snmpPrivProtocol",
+          snmp_priv_key as "snmpPrivKey",
+          snmp_security_level as "snmpSecurityLevel",
+          oid_profile as "oidProfile",
+          oid_overrides as "oidOverrides",
+          poll_interval_seconds as "pollIntervalSeconds",
+          enabled,
+          last_poll_at as "lastPollAt",
+          last_poll_success as "lastPollSuccess",
+          last_poll_error as "lastPollError",
+          consecutive_failures as "consecutiveFailures",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
       `, [
         input.name,
         input.host,
@@ -144,7 +162,7 @@ export class DeviceRepository {
       ]);
 
       logger.info('Device created', { deviceId: result.rows[0].id, name: input.name });
-      return result.rows[0];
+      return result.rows[0] as Device;
     } catch (error) {
       logger.error('Failed to create device', { input, error });
       throw new DatabaseError('Failed to create device');
@@ -231,15 +249,33 @@ export class DeviceRepository {
       }
 
       values.push(id);
-      const result = await db.query<Device>(`
+      const result = await db.query<any>(`
         UPDATE devices
         SET ${updates.join(', ')}
         WHERE id = $${paramIndex}
-        RETURNING *
+        RETURNING
+          id, name, host, port, manufacturer, model,
+          snmp_version as "snmpVersion",
+          snmp_username as "snmpUsername",
+          snmp_auth_protocol as "snmpAuthProtocol",
+          snmp_auth_key as "snmpAuthKey",
+          snmp_priv_protocol as "snmpPrivProtocol",
+          snmp_priv_key as "snmpPrivKey",
+          snmp_security_level as "snmpSecurityLevel",
+          oid_profile as "oidProfile",
+          oid_overrides as "oidOverrides",
+          poll_interval_seconds as "pollIntervalSeconds",
+          enabled,
+          last_poll_at as "lastPollAt",
+          last_poll_success as "lastPollSuccess",
+          last_poll_error as "lastPollError",
+          consecutive_failures as "consecutiveFailures",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
       `, values);
 
       logger.info('Device updated', { deviceId: id });
-      return result.rows[0];
+      return result.rows[0] as Device;
     } catch (error) {
       logger.error('Failed to update device', { id, input, error });
       throw new DatabaseError('Failed to update device');
