@@ -1,0 +1,30 @@
+[Unit]
+Description=UPS Monitor API
+Documentation=https://github.com/your-org/ups-monitor
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=ups-monitor
+Group=ups-monitor
+WorkingDirectory=/opt/ups-monitor
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ups-monitor
+
+# Environment
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/ups-monitor/.env
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/ups-monitor/logs
+
+[Install]
+WantedBy=multi-user.target
