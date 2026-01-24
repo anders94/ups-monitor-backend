@@ -1,4 +1,4 @@
-# UPS Monitor API
+# UPS Monitor API Backend
 
 A lightweight Node.js backend API that monitors multiple UPS devices via SNMPv3, stores time-series data in PostgreSQL, and provides REST API endpoints for power consumption graphs and battery event history.
 
@@ -61,7 +61,7 @@ A lightweight Node.js backend API that monitors multiple UPS devices via SNMPv3,
 
 1. **Clone or extract the project**
    ```bash
-   cd ups-monitor
+   cd ups-monitor-backend
    ```
 
 2. **Install dependencies**
@@ -364,7 +364,7 @@ See `deployment/windows/install-service.md` for NSSM installation guide.
 ### Project Structure
 
 ```
-ups-monitor/
+ups-monitor-backend/
 ├── src/
 │   ├── api/                    # API layer (routes, controllers, middleware)
 │   ├── collectors/             # SNMP polling and OID profiles
