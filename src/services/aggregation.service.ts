@@ -79,7 +79,7 @@ export class AggregationService {
 
     try {
       const result = await db.query(`
-        SELECT device_id as "deviceId"
+        SELECT id as "deviceId"
         FROM devices
         WHERE enabled = true
       `);
@@ -123,66 +123,66 @@ export class AggregationService {
       // Query to aggregate raw metrics into time buckets
       const result = await db.query(`
         SELECT
-          device_id,
+          device_id as "deviceId",
           date_trunc('hour', timestamp) +
-            INTERVAL '1 second' * (EXTRACT(EPOCH FROM timestamp)::INTEGER / $4 * $4) as bucket_start,
-          $4 as bucket_duration_seconds,
+            INTERVAL '1 second' * (EXTRACT(EPOCH FROM timestamp)::INTEGER / $4 * $4) as "bucketStart",
+          $4 as "bucketDurationSeconds",
 
           -- Power metrics
-          AVG(output_power_watts) as avg_output_power_watts,
-          MIN(output_power_watts) as min_output_power_watts,
-          MAX(output_power_watts) as max_output_power_watts,
-          AVG(output_power_va) as avg_output_power_va,
-          MIN(output_power_va) as min_output_power_va,
-          MAX(output_power_va) as max_output_power_va,
-          AVG(output_load_percent) as avg_output_load_percent,
-          MIN(output_load_percent) as min_output_load_percent,
-          MAX(output_load_percent) as max_output_load_percent,
+          AVG(output_power_watts) as "avgOutputPowerWatts",
+          MIN(output_power_watts) as "minOutputPowerWatts",
+          MAX(output_power_watts) as "maxOutputPowerWatts",
+          AVG(output_power_va) as "avgOutputPowerVa",
+          MIN(output_power_va) as "minOutputPowerVa",
+          MAX(output_power_va) as "maxOutputPowerVa",
+          AVG(output_load_percent) as "avgOutputLoadPercent",
+          MIN(output_load_percent) as "minOutputLoadPercent",
+          MAX(output_load_percent) as "maxOutputLoadPercent",
 
           -- Battery metrics
-          AVG(battery_capacity_percent) as avg_battery_capacity_percent,
-          MIN(battery_capacity_percent) as min_battery_capacity_percent,
-          MAX(battery_capacity_percent) as max_battery_capacity_percent,
-          AVG(battery_voltage) as avg_battery_voltage,
-          MIN(battery_voltage) as min_battery_voltage,
-          MAX(battery_voltage) as max_battery_voltage,
-          AVG(battery_temperature) as avg_battery_temperature,
-          MIN(battery_temperature) as min_battery_temperature,
-          MAX(battery_temperature) as max_battery_temperature,
-          AVG(battery_runtime_remaining_seconds) as avg_battery_runtime_remaining_seconds,
+          AVG(battery_capacity_percent) as "avgBatteryCapacityPercent",
+          MIN(battery_capacity_percent) as "minBatteryCapacityPercent",
+          MAX(battery_capacity_percent) as "maxBatteryCapacityPercent",
+          AVG(battery_voltage) as "avgBatteryVoltage",
+          MIN(battery_voltage) as "minBatteryVoltage",
+          MAX(battery_voltage) as "maxBatteryVoltage",
+          AVG(battery_temperature) as "avgBatteryTemperature",
+          MIN(battery_temperature) as "minBatteryTemperature",
+          MAX(battery_temperature) as "maxBatteryTemperature",
+          AVG(battery_runtime_remaining_seconds) as "avgBatteryRuntimeRemainingSeconds",
 
           -- Input/Output metrics
-          AVG(input_voltage) as avg_input_voltage,
-          AVG(output_voltage) as avg_output_voltage,
-          AVG(input_frequency) as avg_input_frequency,
-          AVG(output_frequency) as avg_output_frequency,
+          AVG(input_voltage) as "avgInputVoltage",
+          AVG(output_voltage) as "avgOutputVoltage",
+          AVG(input_frequency) as "avgInputFrequency",
+          AVG(output_frequency) as "avgOutputFrequency",
 
           -- On-battery statistics
-          COUNT(*) FILTER (WHERE on_battery = true) as on_battery_sample_count,
-          COUNT(*) FILTER (WHERE on_battery = true) * 60 as on_battery_total_seconds,
+          COUNT(*) FILTER (WHERE on_battery = true) as "onBatterySampleCount",
+          COUNT(*) FILTER (WHERE on_battery = true) * 60 as "onBatteryTotalSeconds",
 
           -- Data quality
-          COUNT(*) as sample_count
+          COUNT(*) as "sampleCount"
 
         FROM metrics_raw
         WHERE device_id = $1
           AND timestamp >= $2
           AND timestamp < $3
-        GROUP BY device_id, bucket_start
+        GROUP BY device_id, "bucketStart"
       `, [deviceId, start, end, bucketDurationSeconds]);
 
       // Count battery events in period
       for (const row of result.rows) {
-        const bucketEnd = new Date(row.bucket_start);
+        const bucketEnd = new Date(row.bucketStart);
         bucketEnd.setSeconds(bucketEnd.getSeconds() + bucketDurationSeconds);
 
         const eventCount = await eventsRepository.countBatteryEvents(
           deviceId,
-          row.bucket_start,
+          row.bucketStart,
           bucketEnd
         );
 
-        row.on_battery_event_count = eventCount;
+        row.onBatteryEventCount = eventCount;
 
         // Insert aggregated metrics
         await metricsRepository.insertAggregatedMetric(row);
