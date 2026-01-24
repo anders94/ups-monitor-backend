@@ -271,7 +271,6 @@ See `.env.example` for all available options:
 | `RETENTION_RAW_DAYS` | Raw metrics retention | 30 |
 | `RETENTION_HOURLY_DAYS` | Hourly aggregates retention | 365 |
 | `RETENTION_DAILY_DAYS` | Daily aggregates retention | 1095 |
-| `LOG_LEVEL` | Logging level (error/warn/info/debug) | info |
 
 ### OID Profiles
 
@@ -382,8 +381,7 @@ ups-monitor-backend/
 │   └── seeds/                  # Seed data
 ├── scripts/                    # Helper scripts
 ├── deployment/                 # Deployment configurations
-├── tests/                      # Test files
-└── logs/                       # Application logs
+└── tests/                      # Test files
 ```
 
 ### NPM Scripts
@@ -471,11 +469,7 @@ curl -X POST http://localhost:3000/api/v1/devices/1/test
    curl http://localhost:3000/api/v1/devices
    ```
 
-3. Check logs:
-   ```bash
-   tail -f logs/combined.log
-   tail -f logs/error.log
-   ```
+3. Check logs in console output (stdout/stderr)
 
 4. Query raw metrics directly:
    ```sql

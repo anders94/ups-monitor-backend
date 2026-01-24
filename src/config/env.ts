@@ -37,10 +37,6 @@ const envSchema = Joi.object({
   RETENTION_HOURLY_DAYS: Joi.number().default(365),
   RETENTION_DAILY_DAYS: Joi.number().default(1095),
   RETENTION_WEEKLY_DAYS: Joi.number().default(1825),
-
-  // Logging
-  LOG_LEVEL: Joi.string().valid('error', 'warn', 'info', 'debug').default('info'),
-  LOG_FILE_PATH: Joi.string().default('logs/'),
 }).unknown();
 
 const { error, value: envVars } = envSchema.validate(process.env);
@@ -86,10 +82,6 @@ export const config = {
     hourlyDays: envVars.RETENTION_HOURLY_DAYS as number,
     dailyDays: envVars.RETENTION_DAILY_DAYS as number,
     weeklyDays: envVars.RETENTION_WEEKLY_DAYS as number,
-  },
-  logging: {
-    level: envVars.LOG_LEVEL as string,
-    filePath: envVars.LOG_FILE_PATH as string,
   },
 };
 

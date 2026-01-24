@@ -36,8 +36,7 @@
     "joi": "^17.13.0",
     "net-snmp": "^3.26.0",
     "node-cron": "^3.0.3",
-    "pg": "^8.12.0",
-    "winston": "^3.13.0"
+    "pg": "^8.12.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
