@@ -271,6 +271,7 @@ See `.env.example` for all available options:
 | `RETENTION_RAW_DAYS` | Raw metrics retention | 30 |
 | `RETENTION_HOURLY_DAYS` | Hourly aggregates retention | 365 |
 | `RETENTION_DAILY_DAYS` | Daily aggregates retention | 1095 |
+| `LOG_LEVEL` | Logging level (error/warn/info/debug) | info |
 
 ### OID Profiles
 
