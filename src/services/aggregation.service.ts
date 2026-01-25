@@ -124,8 +124,7 @@ export class AggregationService {
       const result = await db.query(`
         SELECT
           device_id as "deviceId",
-          date_trunc('hour', timestamp) +
-            INTERVAL '1 second' * (EXTRACT(EPOCH FROM timestamp)::INTEGER / $4 * $4) as "bucketStart",
+          to_timestamp(EXTRACT(EPOCH FROM timestamp)::INTEGER / $4 * $4) as "bucketStart",
           $4 as "bucketDurationSeconds",
 
           -- Power metrics
@@ -149,7 +148,7 @@ export class AggregationService {
           AVG(battery_temperature) as "avgBatteryTemperature",
           MIN(battery_temperature) as "minBatteryTemperature",
           MAX(battery_temperature) as "maxBatteryTemperature",
-          AVG(battery_runtime_remaining_seconds) as "avgBatteryRuntimeRemainingSeconds",
+          ROUND(AVG(battery_runtime_remaining_seconds))::INTEGER as "avgBatteryRuntimeRemainingSeconds",
 
           -- Input/Output metrics
           AVG(input_voltage) as "avgInputVoltage",

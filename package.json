@@ -15,7 +15,8 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "migrate": "bash scripts/setup-database.sh",
     "seed": "ts-node scripts/seed-sample-device.ts",
-    "manual-poll": "ts-node scripts/manual-poll.ts"
+    "manual-poll": "ts-node scripts/manual-poll.ts",
+    "backfill": "ts-node scripts/backfill-aggregations.ts"
   },
   "keywords": [
     "ups",
