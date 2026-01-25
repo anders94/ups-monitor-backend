@@ -26,6 +26,7 @@ Thumbs.db
 *.swp
 *.swo
 *~
+.*~
 
 # Test coverage
 coverage/
@@ -44,5 +45,5 @@ log/
 # Temp files
 tmp/
 temp/
-*~
-.*~
+
+notes.txt
