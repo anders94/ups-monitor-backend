@@ -13,6 +13,7 @@ export class RetentionService {
     try {
       await this.cleanupRawMetrics();
       await this.cleanupHourlyAggregates();
+      await this.cleanupSixHourlyAggregates();
       await this.cleanupDailyAggregates();
       await this.cleanupWeeklyAggregates();
       await this.cleanupBatteryEvents();
@@ -54,6 +55,21 @@ export class RetentionService {
     const deletedCount = await metricsRepository.deleteOldAggregatedMetrics(3600, cutoffDate);
 
     logger.info('Hourly aggregates cleanup completed', { deletedCount });
+  }
+
+  /**
+   * Delete old six-hourly aggregates
+   */
+  async cleanupSixHourlyAggregates(): Promise<void> {
+    const retentionDays = config.retention.sixHourlyDays;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+
+    logger.info('Cleaning up six-hourly aggregates', { retentionDays, cutoffDate });
+
+    const deletedCount = await metricsRepository.deleteOldAggregatedMetrics(21600, cutoffDate);
+
+    logger.info('Six-hourly aggregates cleanup completed', { deletedCount });
   }
 
   /**

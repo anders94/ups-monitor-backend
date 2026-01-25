@@ -19,6 +19,26 @@ export class AggregationService {
   }
 
   /**
+   * Aggregate six-hourly data (last complete 6-hour period)
+   */
+  async aggregateSixHourly(): Promise<void> {
+    const bucketDuration = 21600; // 6 hours in seconds
+    const now = new Date();
+
+    // Calculate the start of the last complete 6-hour period
+    // 6-hour blocks: 0-6, 6-12, 12-18, 18-24
+    const currentHour = now.getHours();
+    const sixHourBlock = Math.floor(currentHour / 6);
+    const endOfLastBlock = new Date(now);
+    endOfLastBlock.setHours(sixHourBlock * 6, 0, 0, 0);
+
+    const startOfLastBlock = new Date(endOfLastBlock);
+    startOfLastBlock.setHours(startOfLastBlock.getHours() - 6);
+
+    await this.aggregateForPeriod(startOfLastBlock, endOfLastBlock, bucketDuration, 'six-hourly');
+  }
+
+  /**
    * Aggregate daily data (yesterday)
    */
   async aggregateDaily(): Promise<void> {

@@ -28,6 +28,7 @@ const envSchema = Joi.object({
 
   // Aggregation (cron expressions)
   AGGREGATION_HOURLY_CRON: Joi.string().default('0 * * * *'),
+  AGGREGATION_SIX_HOURLY_CRON: Joi.string().default('0 */6 * * *'),
   AGGREGATION_DAILY_CRON: Joi.string().default('5 0 * * *'),
   AGGREGATION_WEEKLY_CRON: Joi.string().default('15 0 * * 0'),
   AGGREGATION_MONTHLY_CRON: Joi.string().default('30 0 1 * *'),
@@ -35,6 +36,7 @@ const envSchema = Joi.object({
   // Data Retention (days)
   RETENTION_RAW_DAYS: Joi.number().default(30),
   RETENTION_HOURLY_DAYS: Joi.number().default(365),
+  RETENTION_SIX_HOURLY_DAYS: Joi.number().default(180),
   RETENTION_DAILY_DAYS: Joi.number().default(1095),
   RETENTION_WEEKLY_DAYS: Joi.number().default(1825),
 
@@ -76,6 +78,7 @@ export const config = {
   },
   aggregation: {
     hourlyCron: envVars.AGGREGATION_HOURLY_CRON as string,
+    sixHourlyCron: envVars.AGGREGATION_SIX_HOURLY_CRON as string,
     dailyCron: envVars.AGGREGATION_DAILY_CRON as string,
     weeklyCron: envVars.AGGREGATION_WEEKLY_CRON as string,
     monthlyCron: envVars.AGGREGATION_MONTHLY_CRON as string,
@@ -83,6 +86,7 @@ export const config = {
   retention: {
     rawDays: envVars.RETENTION_RAW_DAYS as number,
     hourlyDays: envVars.RETENTION_HOURLY_DAYS as number,
+    sixHourlyDays: envVars.RETENTION_SIX_HOURLY_DAYS as number,
     dailyDays: envVars.RETENTION_DAILY_DAYS as number,
     weeklyDays: envVars.RETENTION_WEEKLY_DAYS as number,
   },

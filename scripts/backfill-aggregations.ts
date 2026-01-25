@@ -9,6 +9,7 @@ interface BackfillOptions {
   startDate?: Date;
   endDate?: Date;
   hourly?: boolean;
+  sixHourly?: boolean;
   daily?: boolean;
   weekly?: boolean;
   monthly?: boolean;
@@ -67,6 +68,7 @@ async function backfillAggregations(options: BackfillOptions = {}) {
     console.log(`  Start: ${start.toISOString()}`);
     console.log(`  End: ${end.toISOString()}`);
     console.log(`  Hourly: ${options.hourly !== false ? 'YES' : 'NO'}`);
+    console.log(`  Six-Hourly: ${options.sixHourly === true ? 'YES' : 'NO'}`);
     console.log(`  Daily: ${options.daily === true ? 'YES' : 'NO'}`);
     console.log(`  Weekly: ${options.weekly === true ? 'YES' : 'NO'}`);
     console.log(`  Monthly: ${options.monthly === true ? 'YES' : 'NO'}`);
@@ -112,6 +114,47 @@ async function backfillAggregations(options: BackfillOptions = {}) {
 
       console.log(`✓ Completed ${hourCount} hourly aggregations\n`);
       totalBucketsCreated += hourCount;
+    }
+
+    // Backfill six-hourly aggregations
+    if (options.sixHourly === true) {
+      console.log('-------------------------------------------');
+      console.log('Backfilling six-hourly aggregations...');
+      console.log('-------------------------------------------');
+
+      const currentPeriod = new Date(start);
+      currentPeriod.setHours(Math.floor(currentPeriod.getHours() / 6) * 6, 0, 0, 0);
+      let sixHourCount = 0;
+
+      while (currentPeriod < end) {
+        const nextPeriod = new Date(currentPeriod);
+        nextPeriod.setHours(nextPeriod.getHours() + 6);
+
+        // Skip the current incomplete 6-hour period
+        if (nextPeriod > new Date()) {
+          console.log(`Skipping incomplete 6-hour period: ${currentPeriod.toISOString()}`);
+          break;
+        }
+
+        console.log(`Processing: ${currentPeriod.toISOString()} - ${nextPeriod.toISOString()}`);
+
+        try {
+          await (aggregationService as any).aggregateForPeriod(
+            currentPeriod,
+            nextPeriod,
+            21600,
+            'six-hourly-backfill'
+          );
+          sixHourCount++;
+        } catch (error) {
+          console.error(`  ✗ Failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+
+        currentPeriod.setHours(currentPeriod.getHours() + 6);
+      }
+
+      console.log(`✓ Completed ${sixHourCount} six-hourly aggregations\n`);
+      totalBucketsCreated += sixHourCount;
     }
 
     // Backfill daily aggregations
@@ -263,12 +306,15 @@ for (let i = 0; i < args.length; i++) {
 
   if (arg === '--daily') {
     options.daily = true;
+  } else if (arg === '--six-hourly') {
+    options.sixHourly = true;
   } else if (arg === '--weekly') {
     options.weekly = true;
   } else if (arg === '--monthly') {
     options.monthly = true;
   } else if (arg === '--all') {
     options.hourly = true;
+    options.sixHourly = true;
     options.daily = true;
     options.weekly = true;
     options.monthly = true;
@@ -289,6 +335,7 @@ Usage:
   npm run backfill -- --start 2026-01-24 --end 2026-01-25
 
 Options:
+  --six-hourly           Include six-hourly aggregations
   --daily                Include daily aggregations
   --weekly               Include weekly aggregations
   --monthly              Include monthly aggregations
@@ -299,7 +346,7 @@ Options:
 
 Examples:
   npm run backfill
-  npm run backfill -- --daily --weekly
+  npm run backfill -- --six-hourly --daily
   npm run backfill -- --all
   npm run backfill -- --start 2026-01-01 --end 2026-01-31
 `);

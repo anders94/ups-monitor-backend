@@ -51,6 +51,20 @@ export class Scheduler {
       })
     );
 
+    // Six-hourly aggregation
+    this.jobs.push(
+      cron.schedule(config.aggregation.sixHourlyCron, async () => {
+        logger.info('Running six-hourly aggregation job');
+        try {
+          await aggregationService.aggregateSixHourly();
+        } catch (error) {
+          logger.error('Six-hourly aggregation job failed', {
+            error: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      })
+    );
+
     // Daily aggregation
     this.jobs.push(
       cron.schedule(config.aggregation.dailyCron, async () => {
@@ -114,6 +128,7 @@ export class Scheduler {
     logger.info('Scheduler started', {
       pollInterval: `${pollInterval} seconds`,
       hourlyCron: config.aggregation.hourlyCron,
+      sixHourlyCron: config.aggregation.sixHourlyCron,
       dailyCron: config.aggregation.dailyCron,
       weeklyCron: config.aggregation.weeklyCron,
       jobCount: this.jobs.length,
