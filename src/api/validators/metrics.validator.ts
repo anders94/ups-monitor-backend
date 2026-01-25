@@ -7,13 +7,13 @@ export const deviceIdSchema = Joi.object({
 export const metricsQuerySchema = Joi.object({
   start: Joi.date().iso().optional(),
   end: Joi.date().iso().optional(),
-  interval: Joi.number().integer().valid(60, 3600, 86400, 604800, 2592000).optional(),
+  interval: Joi.number().integer().valid(60, 3600, 21600, 86400, 604800, 2592000).optional(),
 });
 
 export const multiDeviceMetricsQuerySchema = Joi.object({
   start: Joi.date().iso().optional(),
   end: Joi.date().iso().optional(),
-  interval: Joi.number().integer().valid(60, 3600, 86400, 604800, 2592000).optional(),
+  interval: Joi.number().integer().valid(60, 3600, 21600, 86400, 604800, 2592000).optional(),
   deviceIds: Joi.array().items(Joi.number().integer().positive()).min(1).required(),
 });
 

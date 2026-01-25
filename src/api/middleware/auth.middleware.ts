@@ -10,7 +10,7 @@ import { config } from '../../config/env';
  * 2. Uncommenting the middleware in routes where needed
  * 3. Passing API key in header: X-API-Key: <your-key>
  */
-export function apiKeyAuth(req: Request, res: Response, next: NextFunction): void {
+export function apiKeyAuth(req: Request, _res: Response, next: NextFunction): void {
   // Skip if no API key configured (internal-only deployment)
   if (!config.app.apiKey) {
     next();
@@ -34,8 +34,8 @@ export function apiKeyAuth(req: Request, res: Response, next: NextFunction): voi
  * Optional admin-level authentication
  * Can be extended with user roles, JWT, etc.
  */
-export function adminAuth(req: Request, res: Response, next: NextFunction): void {
+export function adminAuth(req: Request, _res: Response, next: NextFunction): void {
   // For now, uses same API key
   // In production, implement proper role-based access control
-  apiKeyAuth(req, res, next);
+  apiKeyAuth(req, _res, next);
 }

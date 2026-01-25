@@ -69,10 +69,10 @@ export class Metric implements MetricRaw {
 }
 
 export class AggregatedMetric implements MetricAggregated {
-  id: number;
-  deviceId: number;
-  bucketStart: Date;
-  bucketDurationSeconds: number;
+  id!: number;
+  deviceId!: number;
+  bucketStart!: Date;
+  bucketDurationSeconds!: number;
 
   // Aggregated Power Metrics
   avgOutputPowerWatts?: number;
@@ -104,15 +104,15 @@ export class AggregatedMetric implements MetricAggregated {
   avgOutputFrequency?: number;
 
   // On-Battery Statistics
-  onBatterySampleCount: number;
-  onBatteryTotalSeconds: number;
-  onBatteryEventCount: number;
+  onBatterySampleCount!: number;
+  onBatteryTotalSeconds!: number;
+  onBatteryEventCount!: number;
 
   // Data Quality
-  sampleCount: number;
+  sampleCount!: number;
 
   // Metadata
-  createdAt: Date;
+  createdAt!: Date;
 
   constructor(data: MetricAggregated) {
     Object.assign(this, data);
