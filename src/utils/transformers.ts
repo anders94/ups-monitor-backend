@@ -68,8 +68,11 @@ export function autoSelectBucketDuration(start: Date, end: Date): number {
   // < 6 hours: use raw data (60 seconds)
   if (durationHours < 6) return 60;
 
-  // < 7 days: use hourly (3600 seconds)
-  if (durationHours < 168) return 3600;
+  // < 2 days (48 hours): use hourly (3600 seconds)
+  if (durationHours < 48) return 3600;
+
+  // < 7 days (168 hours): use six-hourly (21600 seconds)
+  if (durationHours < 168) return 21600;
 
   // < 90 days: use daily (86400 seconds)
   if (durationHours < 2160) return 86400;
