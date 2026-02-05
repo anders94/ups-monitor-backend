@@ -223,6 +223,101 @@ export class MetricsRepository {
   }
 
   /**
+   * Get dynamically aggregated metrics from raw data (for custom bucket sizes)
+   * Computes aggregations on-the-fly instead of using pre-computed tables
+   */
+  async getDynamicAggregatedMetrics(
+    deviceId: number,
+    start: Date,
+    end: Date,
+    bucketDurationSeconds: number
+  ): Promise<MetricAggregated[]> {
+    try {
+      const result = await db.query<any>(`
+        WITH buckets_with_transitions AS (
+          SELECT
+            device_id,
+            timestamp,
+            to_timestamp(EXTRACT(EPOCH FROM timestamp)::INTEGER / $4 * $4) as bucket_start,
+            output_power_watts,
+            output_power_va,
+            output_load_percent,
+            battery_capacity_percent,
+            battery_voltage,
+            battery_temperature,
+            battery_runtime_remaining_seconds,
+            input_voltage,
+            output_voltage,
+            input_frequency,
+            output_frequency,
+            on_battery,
+            -- Mark battery event transitions (off->on)
+            CASE
+              WHEN on_battery = true
+                AND (LAG(on_battery) OVER (PARTITION BY device_id ORDER BY timestamp) IS NULL
+                     OR LAG(on_battery) OVER (PARTITION BY device_id ORDER BY timestamp) = false)
+              THEN 1
+              ELSE 0
+            END as battery_event_start
+          FROM metrics_raw
+          WHERE device_id = $1
+            AND timestamp >= $2
+            AND timestamp <= $3
+        )
+        SELECT
+          device_id as "deviceId",
+          bucket_start as "bucketStart",
+          $4 as "bucketDurationSeconds",
+
+          -- Power metrics
+          AVG(output_power_watts)::NUMERIC(10, 2) as "avgOutputPowerWatts",
+          MIN(output_power_watts)::NUMERIC(10, 2) as "minOutputPowerWatts",
+          MAX(output_power_watts)::NUMERIC(10, 2) as "maxOutputPowerWatts",
+          AVG(output_power_va)::NUMERIC(10, 2) as "avgOutputPowerVa",
+          MIN(output_power_va)::NUMERIC(10, 2) as "minOutputPowerVa",
+          MAX(output_power_va)::NUMERIC(10, 2) as "maxOutputPowerVa",
+          AVG(output_load_percent)::NUMERIC(5, 2) as "avgOutputLoadPercent",
+          MIN(output_load_percent)::NUMERIC(5, 2) as "minOutputLoadPercent",
+          MAX(output_load_percent)::NUMERIC(5, 2) as "maxOutputLoadPercent",
+
+          -- Battery metrics
+          AVG(battery_capacity_percent)::NUMERIC(5, 2) as "avgBatteryCapacityPercent",
+          MIN(battery_capacity_percent)::NUMERIC(5, 2) as "minBatteryCapacityPercent",
+          MAX(battery_capacity_percent)::NUMERIC(5, 2) as "maxBatteryCapacityPercent",
+          AVG(battery_voltage)::NUMERIC(6, 2) as "avgBatteryVoltage",
+          MIN(battery_voltage)::NUMERIC(6, 2) as "minBatteryVoltage",
+          MAX(battery_voltage)::NUMERIC(6, 2) as "maxBatteryVoltage",
+          AVG(battery_temperature)::NUMERIC(5, 2) as "avgBatteryTemperature",
+          MIN(battery_temperature)::NUMERIC(5, 2) as "minBatteryTemperature",
+          MAX(battery_temperature)::NUMERIC(5, 2) as "maxBatteryTemperature",
+          AVG(battery_runtime_remaining_seconds)::INTEGER as "avgBatteryRuntimeRemainingSeconds",
+
+          -- Input/Output metrics
+          AVG(input_voltage)::NUMERIC(6, 2) as "avgInputVoltage",
+          AVG(output_voltage)::NUMERIC(6, 2) as "avgOutputVoltage",
+          AVG(input_frequency)::NUMERIC(5, 2) as "avgInputFrequency",
+          AVG(output_frequency)::NUMERIC(5, 2) as "avgOutputFrequency",
+
+          -- Battery event statistics
+          COUNT(*) FILTER (WHERE on_battery = true) as "onBatterySampleCount",
+          (COUNT(*) FILTER (WHERE on_battery = true) * 60) as "onBatteryTotalSeconds",
+          SUM(battery_event_start) as "onBatteryEventCount",
+
+          COUNT(*) as "sampleCount"
+
+        FROM buckets_with_transitions
+        GROUP BY device_id, bucket_start
+        ORDER BY bucket_start ASC
+      `, [deviceId, start, end, bucketDurationSeconds]);
+
+      return result.rows as MetricAggregated[];
+    } catch (error) {
+      logger.error('Failed to get dynamic aggregated metrics', { deviceId, start, end, bucketDurationSeconds, error });
+      throw new DatabaseError('Failed to get dynamic aggregated metrics');
+    }
+  }
+
+  /**
    * Get aggregated metrics for multiple devices
    */
   async getMultiDeviceAggregatedMetrics(

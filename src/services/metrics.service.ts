@@ -3,6 +3,9 @@ import { MetricRaw, MetricAggregated } from '../types/database.types';
 import { autoSelectBucketDuration } from '../utils/transformers';
 
 export class MetricsService {
+  // Pre-computed bucket sizes available in metrics_aggregated table
+  private readonly PRE_COMPUTED_BUCKETS = [3600, 21600, 86400, 604800, 2592000];
+
   /**
    * Get latest metric for device
    */
@@ -27,8 +30,13 @@ export class MetricsService {
       return metricsRepository.getRawMetrics(deviceId, start, end);
     }
 
-    // Use aggregated data for longer intervals
-    return metricsRepository.getAggregatedMetrics(deviceId, start, end, bucketDuration);
+    // Use pre-computed aggregated data if available
+    if (this.PRE_COMPUTED_BUCKETS.includes(bucketDuration)) {
+      return metricsRepository.getAggregatedMetrics(deviceId, start, end, bucketDuration);
+    }
+
+    // Use dynamic aggregation for custom bucket sizes
+    return metricsRepository.getDynamicAggregatedMetrics(deviceId, start, end, bucketDuration);
   }
 
   /**

@@ -8,14 +8,16 @@ export const metricsQuerySchema = Joi.object({
   start: Joi.date().iso().optional(),
   end: Joi.date().iso().optional(),
   interval: Joi.number().integer().valid(60, 3600, 21600, 86400, 604800, 2592000).optional(),
-});
+  bucket: Joi.number().integer().min(60).max(86400).optional(),
+}).or('interval', 'bucket');
 
 export const multiDeviceMetricsQuerySchema = Joi.object({
   start: Joi.date().iso().optional(),
   end: Joi.date().iso().optional(),
   interval: Joi.number().integer().valid(60, 3600, 21600, 86400, 604800, 2592000).optional(),
+  bucket: Joi.number().integer().min(60).max(86400).optional(),
   deviceIds: Joi.array().items(Joi.number().integer().positive()).min(1).required(),
-});
+}).or('interval', 'bucket');
 
 export const batteryEventsQuerySchema = Joi.object({
   start: Joi.date().iso().optional(),

@@ -21,9 +21,11 @@ export class MetricsController {
       // Parse query parameters
       const start = req.query.start ? new Date(req.query.start as string) : new Date(Date.now() - 24 * 60 * 60 * 1000);
       const end = req.query.end ? new Date(req.query.end as string) : new Date();
-      const interval = req.query.interval ? parseInt(req.query.interval as string, 10) : undefined;
+      // Support both 'bucket' (new) and 'interval' (legacy) parameters
+      const bucketSize = req.query.bucket ? parseInt(req.query.bucket as string, 10) :
+                         req.query.interval ? parseInt(req.query.interval as string, 10) : undefined;
 
-      const metrics = await metricsService.getPowerMetrics(deviceId, start, end, interval);
+      const metrics = await metricsService.getPowerMetrics(deviceId, start, end, bucketSize);
 
       res.json({
         success: true,
@@ -31,7 +33,7 @@ export class MetricsController {
         meta: {
           timestamp: new Date().toISOString(),
           requestId: (req as any).requestId,
-          query: { start, end, interval },
+          query: { start, end, bucketSize },
         },
       });
     } catch (error) {
@@ -55,9 +57,11 @@ export class MetricsController {
       // Parse query parameters
       const start = req.query.start ? new Date(req.query.start as string) : new Date(Date.now() - 24 * 60 * 60 * 1000);
       const end = req.query.end ? new Date(req.query.end as string) : new Date();
-      const interval = req.query.interval ? parseInt(req.query.interval as string, 10) : undefined;
+      // Support both 'bucket' (new) and 'interval' (legacy) parameters
+      const bucketSize = req.query.bucket ? parseInt(req.query.bucket as string, 10) :
+                         req.query.interval ? parseInt(req.query.interval as string, 10) : undefined;
 
-      const metrics = await metricsService.getBatteryMetrics(deviceId, start, end, interval);
+      const metrics = await metricsService.getBatteryMetrics(deviceId, start, end, bucketSize);
 
       res.json({
         success: true,
@@ -65,7 +69,7 @@ export class MetricsController {
         meta: {
           timestamp: new Date().toISOString(),
           requestId: (req as any).requestId,
-          query: { start, end, interval },
+          query: { start, end, bucketSize },
         },
       });
     } catch (error) {
@@ -162,9 +166,11 @@ export class MetricsController {
       // Parse query parameters
       const start = req.query.start ? new Date(req.query.start as string) : new Date(Date.now() - 24 * 60 * 60 * 1000);
       const end = req.query.end ? new Date(req.query.end as string) : new Date();
-      const interval = req.query.interval ? parseInt(req.query.interval as string, 10) : undefined;
+      // Support both 'bucket' (new) and 'interval' (legacy) parameters
+      const bucketSize = req.query.bucket ? parseInt(req.query.bucket as string, 10) :
+                         req.query.interval ? parseInt(req.query.interval as string, 10) : undefined;
 
-      const metrics = await metricsService.getTotalPowerMetrics(deviceIds, start, end, interval);
+      const metrics = await metricsService.getTotalPowerMetrics(deviceIds, start, end, bucketSize);
 
       res.json({
         success: true,
@@ -172,7 +178,7 @@ export class MetricsController {
         meta: {
           timestamp: new Date().toISOString(),
           requestId: (req as any).requestId,
-          query: { deviceIds, start, end, interval },
+          query: { deviceIds, start, end, bucketSize },
         },
       });
     } catch (error) {
