@@ -45,16 +45,16 @@ async function manualPoll() {
 
         console.log(`✓ Poll successful (${duration}ms)\n`);
         console.log('Metrics:');
-        console.log(`  Power Output: ${metrics.outputPowerWatts || 'N/A'} W`);
-        console.log(`  Power (VA): ${metrics.outputPowerVa || 'N/A'} VA`);
-        console.log(`  Load: ${metrics.outputLoadPercent || 'N/A'}%`);
-        console.log(`  Battery Status: ${metrics.batteryStatus || 'N/A'}`);
-        console.log(`  Battery Capacity: ${metrics.batteryCapacityPercent || 'N/A'}%`);
-        console.log(`  Battery Voltage: ${metrics.batteryVoltage || 'N/A'} V`);
-        console.log(`  Battery Temperature: ${metrics.batteryTemperature || 'N/A'} °C`);
-        console.log(`  Runtime Remaining: ${metrics.batteryRuntimeRemainingSeconds ? Math.floor(metrics.batteryRuntimeRemainingSeconds / 60) : 'N/A'} min`);
-        console.log(`  Input Voltage: ${metrics.inputVoltage || 'N/A'} V`);
-        console.log(`  Output Voltage: ${metrics.outputVoltage || 'N/A'} V`);
+        console.log(`  Power Output: ${metrics.outputPowerWatts ?? 'N/A'} W`);
+        console.log(`  Power (VA): ${metrics.outputPowerVa ?? 'N/A'} VA`);
+        console.log(`  Load: ${metrics.outputLoadPercent ?? 'N/A'}%`);
+        console.log(`  Battery Status: ${metrics.batteryStatus ?? 'N/A'}`);
+        console.log(`  Battery Capacity: ${metrics.batteryCapacityPercent ?? 'N/A'}%`);
+        console.log(`  Battery Voltage: ${metrics.batteryVoltage ?? 'N/A'} V`);
+        console.log(`  Battery Temperature: ${metrics.batteryTemperature ?? 'N/A'} °C`);
+        console.log(`  Runtime Remaining: ${metrics.batteryRuntimeRemainingSeconds != null ? Math.floor(metrics.batteryRuntimeRemainingSeconds / 60) : 'N/A'} min`);
+        console.log(`  Input Voltage: ${metrics.inputVoltage ?? 'N/A'} V`);
+        console.log(`  Output Voltage: ${metrics.outputVoltage ?? 'N/A'} V`);
         console.log(`  On Battery: ${metrics.onBattery ? 'YES' : 'NO'}`);
         console.log(`  On Line: ${metrics.onLine ? 'YES' : 'NO'}`);
         console.log(`  Alarms Present: ${metrics.alarmsPresent ? 'YES' : 'NO'}`);
