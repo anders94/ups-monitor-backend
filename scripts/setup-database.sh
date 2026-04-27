@@ -24,18 +24,18 @@ PGHOST="${DB_HOST:-localhost}"
 PGPORT="${DB_PORT:-5432}"
 PGDATABASE="${DB_NAME:-ups_monitor}"
 PGUSER="${DB_USER:-ups_admin}"
-PGPASSWORD="${DB_PASSWORD}"
+PGPASSWORD="$DB_PASSWORD"
 
 export PGPASSWORD
 
-echo "======================================"
+echo "====== ============================="
 echo "UPS Monitor Database Setup"
-echo "======================================"
+echo "====== ============================="
 echo "Host: $PGHOST"
 echo "Port: $PGPORT"
 echo "Database: $PGDATABASE"
 echo "User: $PGUSER"
-echo "======================================"
+echo "====== ============================="
 echo ""
 
 # Check if database exists
@@ -49,18 +49,30 @@ if ! psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" -c '\q' 2>/dev
     echo "  2. Database '$PGDATABASE' exists"
     echo "  3. User '$PGUSER' has access to the database"
     echo ""
-    echo "To create the database and user, run as PostgreSQL superuser:"
+    echo "To create the database and user, run as the 'anders' superuser:"
     echo ""
-    echo "  sudo -u postgres psql <<EOF"
+    echo "  psql -h $PGHOST -p $PGPORT -U anders <<EOF"
     echo "  CREATE DATABASE $PGDATABASE;"
     echo "  CREATE USER $PGUSER WITH ENCRYPTED PASSWORD '$PGPASSWORD';"
     echo "  GRANT ALL PRIVILEGES ON DATABASE $PGDATABASE TO $PGUSER;"
+    echo "  GRANT ALL ON SCHEMA public TO $PGUSER;"
+    echo "  ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO $PGUSER;"
+    echo "  ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO $PGUSER;"
     echo "  EOF"
     echo ""
     exit 1
 fi
 
 echo "✓ Database connection successful"
+echo ""
+
+# Grant schema-level permissions (required since PostgreSQL 15)
+echo "Ensuring schema permissions..."
+SUPERUSER="${SUPERUSER:-anders}"
+psql -h "$PGHOST" -p "$PGPORT" -U "$SUPERUSER" -d "$PGDATABASE" -c "GRANT ALL ON SCHEMA public TO \"$PGUSER\";" > /dev/null 2>&1
+psql -h "$PGHOST" -p "$PGPORT" -U "$SUPERUSER" -d "$PGDATABASE" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"$PGUSER\";" > /dev/null 2>&1 || true
+psql -h "$PGHOST" -p "$PGPORT" -U "$SUPERUSER" -d "$PGDATABASE" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO \"$PGUSER\";" > /dev/null 2>&1 || true
+echo "✓ Schema permissions ensured"
 echo ""
 
 # Run migrations
@@ -84,9 +96,9 @@ for migration in "$MIGRATION_DIR"/*.sql; do
 done
 
 echo ""
-echo "======================================"
+echo "====== ============================="
 echo "✓ Database setup completed successfully!"
-echo "======================================"
+echo "====== ============================="
 echo ""
 echo "Next steps:"
 echo "  1. Start the application: npm run dev"
