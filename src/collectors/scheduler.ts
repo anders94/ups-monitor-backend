@@ -1,4 +1,4 @@
-import cron from 'node-cron';
+import cron, { ScheduledTask } from 'node-cron';
 import snmpCollector from './snmp.collector';
 import aggregationService from '../services/aggregation.service';
 import retentionService from '../services/retention.service';
@@ -6,7 +6,7 @@ import { config } from '../config/env';
 import logger from '../config/logger';
 
 export class Scheduler {
-  private jobs: cron.ScheduledTask[] = [];
+  private jobs: ScheduledTask[] = [];
   private isStarted = false;
 
   /**
